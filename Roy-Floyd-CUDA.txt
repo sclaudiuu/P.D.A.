@@ -1,0 +1,47 @@
+#include<mpi.h>
+#include<iostream>
+#include<time.h>
+#include<Windows.h>
+#define dim 5
+using namespace std;
+
+int matrix[dim][dim] =
+{
+	0,3,9,8,3,
+	5,0,1,4,2,
+	6,6,0,4,5,
+	2,9,2,0,7,
+	7,9,3,2,0
+};
+
+__global__ void executeLastIf(int graf[N][N])
+{
+	int i = threadIdx.x;
+	int j = threadIdx.y;
+	for (int k = 0; k < dim; k++)
+	{
+		if (matrix[i][k] + matrix[k][j] < matrix[i][j])
+			matrix[i][j] = matrix[i][k] + matrix[k][j];
+	}
+}
+
+int main(int argc, char** argv)
+{
+	int* graf, numBlocks = 1;
+	int sz = dim * dim * sizeof(int);
+	cudaMalloc(&graf, sz);
+	cudaMemcpy(graf, matrix, size, cudaMemcpyHostToDevice);
+	dim3 threadsPerBlock(dim, dim);
+	executeLastIf <<<numBlocks, threadsPerBlock >>>(A, B, C);
+	cudaMemcpy(matrix, graf, size, cudaMemcpyDeviceToHost);
+	cudaFree(graf);
+	for (int i = 0; i < dim; i++)
+	{
+		for (int j = 0; j < dim; j++)
+		{
+			cout << matrix[i][j] << " ";
+		}
+		cout << '\n';
+	}
+	return 0;
+}
